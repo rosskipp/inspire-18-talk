@@ -1,36 +1,43 @@
 import promote
-import helpers
-
-# load in our saved model weights
+import pickle
+import pandas as pd
 from sklearn.externals import joblib
-WEIGHTS = joblib.load('./objects/log_reg_model.pkl')
+
+
+shotLabels = joblib.load('./objects/shot_labels.pkl')
+metrics = joblib.load('./objects/model_metrics.pkl')
+
+def convertShotTypeToInt(shotString):
+    return shotLabels[shotString]
+
+# load in our saved shot model
+MODEL = joblib.load('./objects/log_reg_model.pkl')
 
 # instanciate the Promote class with our API information
-USERNAME = "USERNAME"
-API_KEY = "APIKEY"
-PROMOTE_URL = "https://promote.c.yhat.com/"
+USERNAME = "ross"
+API_KEY = "d580d451-06b9-4c10-a73f-523adca5f48c"
+PROMOTE_URL = "http://localhost:3000"
 
 p = promote.Promote(USERNAME, API_KEY, PROMOTE_URL)
 
 def shotPredictor(data):
-    
-    
-    prediction = getclass.get_classname(WEIGHTS.predict(data).tolist())
-    return {"prediction": prediction}
+    data['shotTypeCode'] = convertShotTypeToInt(data['shotType'])
+    df = pd.DataFrame.from_records([data])
+    df = df[["shotTypeCode", "shotOnEmptyNet", "shotRush", "shotRebound",
+                   "shotDistance", "shotAngleAdjusted"]]
+    prediction = MODEL.predict_proba(df)
+    return {"shot_prob": prediction[0][1]}
 
 
 # Add two flowers as test data
-TESTDATA = {"players": [{"player": {"id": 8477444, "fullName": "Andre Burakovsky", "link": "/api/v1/people/8477444"}, "playerType": "Scorer", "seasonTotal": 1}, {"player": {"id": 8474189, "fullName": "Lars Eller", "link": "/api/v1/people/8474189"}, "playerType": "Assist", "seasonTotal": 9}, {"player": {"id": 8476880, "fullName": "Tom Wilson", "link": "/api/v1/people/8476880"}, "playerType": "Assist", "seasonTotal": 9}, {"player": {"id": 8476883, "fullName": "Andrei Vasilevskiy", "link": "/api/v1/people/8476883"}, "playerType": "Goalie"}], "result": {"event": "Goal", "eventCode": "TBL295",
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            "eventTypeId": "GOAL", "description": "Andre Burakovsky (1) Wrist Shot, assists: Lars Eller (9), Tom Wilson (9)", "secondaryType": "Wrist Shot", "strength": {"code": "EVEN", "name": "Even"}, "gameWinningGoal": false, "emptyNet": false}, "about": {"eventIdx": 162, "eventId": 295, "period": 2, "periodType": "REGULAR", "ordinalNum": "2nd", "periodTime": "08:59", "periodTimeRemaining": "11:01", "dateTime": "2018-05-24T01:27:24Z", "goals": {"away": 2, "home": 0}}, "coordinates": {"x": 76, "y": -15}, "team": {"id": 15, "name": "Washington Capitals", "link": "/api/v1/teams/15", "triCode": "WSH"}}
+TESTDATA = {"shotType": "SNAP", "shotOnEmptyNet": 0, "shotRebound": 0,
+            "shotRush": 0, "shotDistance": 7.071068, "shotAngleAdjusted": 45.0}
 print(shotPredictor(TESTDATA))
 
 # add metadata
-p.metadata.n_neighbors = WEIGHTS.n_neighbors
-p.metadata["leaf_size"] = WEIGHTS.leaf_size
+p.metadata.roc_auc_score = metrics['roc_auc_score']
+p.metadata.valid_acc = metrics['valid_acc']
 
 # name and deploy our model
-p.deploy("shotPredictor", irisClassifier, TESTDATA,
+p.deploy("ShotPredictor", shotPredictor, TESTDATA,
          confirm=True, dry_run=False, verbose=2)
-
-# once our model is deployed and online, we can send data and recieve predictions
-# p.predict("IrisClassifier", TESTDATA)
