@@ -1,0 +1,9 @@
+@import '~antd/dist/antd.css';
+.App {
+  text-align: center;
+  margin: 20px;
+}
+
+.rink-image {
+  width: 1200px;
+}
