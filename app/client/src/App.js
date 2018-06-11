@@ -91,8 +91,6 @@ class App extends Component {
     const shotAngleRad = -1 * shotAngle * Math.PI / 180;
     const xLoc = Math.cos(shotAngleRad) * shotDistance;
     const yLoc = Math.sin(shotAngleRad) * shotDistance;
-    // console.log(xLoc)
-    // console.log(yLoc)
 
     const xLocAdj = (xLoc * PPF) + offsetX;
     const yLocAdj = (yLoc * PPF) + offsetY;
