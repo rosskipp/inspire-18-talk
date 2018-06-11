@@ -3,7 +3,7 @@
 ## Taking Care of Model Deployment
 
 This repo holds the code and slides for a talk that I gave at the Alteryx Inspire 2018 conference about
-deploying a Python model to Alteryx Promote
+deploying a Python model to Alteryx Promote. The model is a NHL expected goal probabilty model.
 
 In this repo, you'll find the Jupyter notebook that I used to train the model along with the code to
 deploy the model to Promote from Python.
