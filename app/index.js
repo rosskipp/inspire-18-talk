@@ -4,6 +4,12 @@ const bodyParser = require('body-parser');
 const request = require('request');
 const path = require('path');
 
+const app = express();
+
+app.use(logger('dev'));
+app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, 'client/build')));
+
 const predict = (data, done) => {
   const body = data;
   const url = 'http://localhost/ross/models/ShotPredictor/predict';
@@ -22,18 +28,12 @@ const predict = (data, done) => {
   });
 }
 
-const app = express();
-
-app.use(logger('dev'));
-app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, 'client/build')));
-
 app.post('/predict', (req, res) => {
   predict(req.body, (err, response) => {
-    res.json({
-      status: "OK",
-      prediction: response.result.shot_prob,
-    });
+  res.json({
+    status: "OK",
+    prediction: response.result.shot_prob,
+  });
   });
 });
 
