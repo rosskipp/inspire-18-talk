@@ -1,7 +1,7 @@
 import promote
 import pickle
 import pandas as pd
-from sklearn.externals import joblib
+import joblib
 
 # Load the pickle file with the model training metrics for meta data
 metrics = joblib.load('./objects/model_metrics.pkl')
